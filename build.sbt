@@ -4,12 +4,12 @@ version := "0.0.1"
 
 organization := "edu.berkeley.cs.amplab"
 
-scalaVersion := "2.9.3"
+scalaVersion := "2.9.2"
 
 libraryDependencies ++= Seq(
   "org.spark-project" % "spark-core_2.9.3" % "0.7.3",
+  "org.streum" %% "configrity-core" % "1.0.0",
   "org.scalatest" %% "scalatest" % "1.9.1" % "test"
-  "org.streum" %% "configrity-core" % "1.0.0"
 )
 
 resolvers ++= Seq(
