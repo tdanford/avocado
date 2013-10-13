@@ -32,8 +32,8 @@ class PileupFilterOnMismatch extends PileupFilter {
    * @param[in] pileups An RDD containing reference oriented stacks of nucleotides.
    * @return An RDD containing only pileups that contain at least one mismatch.
    */
-  override def filter (pileups: RDD [(void, Pileup)]): RDD [(void, List[Pileup])] = {
+  override def filter (pileups: RDD [(Unit, Pileup)]): RDD [(Unit, List[Pileup])] = {
     return pileups.filter (_.mismatches != List.empty)
-                  .map (_ => (void, List (_)))
+                  .map (_ => ((), List (_)))
   }
 }

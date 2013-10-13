@@ -32,6 +32,6 @@ abstract class ReadCall (val callName: String,
    * @param[in] pileupGroups An RDD containing lists of reads.
    * @return An RDD containing called variants.
    */
-  def call (pileupGroups: RDD [(void, List[ADAMRecord])]): RDD [ADAMVariant] 
+  def call (pileupGroups: RDD [(Unit, List[ADAMRecord])]): RDD [ADAMVariant] 
 }
 

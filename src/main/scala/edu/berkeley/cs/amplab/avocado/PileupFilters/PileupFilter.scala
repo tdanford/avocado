@@ -32,5 +32,5 @@ abstract class PileupFilter (val filterName: String,
    * @param[in] pileups An RDD containing reference oriented stacks of nucleotides.
    * @return An RDD containing lists of pileups.
    */
-  def filter (pileups: RDD [(void, Pileup)]): RDD [(Any, List[Pileup])] 
+  def filter (pileups: RDD [(Unit, Pileup)]): RDD [(Any, List[Pileup])] 
 }

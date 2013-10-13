@@ -33,7 +33,7 @@ class VariantCallFilterMaxAtLocation extends VariantCallFilter {
   try {
     val ploidy = config [Int]("ploidy")
   } catch {
-    case NoSuchElementException nse: val ploidy = 2
+    case nse: NoSuchElementException => val ploidy = 2
   }
     
   /**
@@ -44,8 +44,8 @@ class VariantCallFilterMaxAtLocation extends VariantCallFilter {
    */
   override def filter (variants: RDD [ADAMVariant]): RDD [ADAMVariant] = {
     variants.map (variant => ((variant.getChromosome (), variant.getPosition ()), variant))
-            .groupByKey ().filter ((k: (Int, Int), v: List [ADAMVariant]) = v.length <= ploidy)
-            .flatMap ((k: (Int, Int), v: List [ADAMVariant]) = v)
+            .groupByKey ().filter (k: (Int, Int), v: List [ADAMVariant]) = v.length <= ploidy
+            .flatMap (k: (Int, Int), v: List [ADAMVariant]) = v
   }
 
 }

@@ -32,5 +32,5 @@ abstract class ReadFilter (val filterName: String,
    * @param[in] reads An RDD containing reads.
    * @return An RDD containing lists of reads.
    */
-  def filter (reads: RDD [(void, ADAMRecord)]): RDD [(Any, List[ADAMRecord])]
+  def filter (reads: RDD [(Unit, ADAMRecord)]): RDD [(Any, List[ADAMRecord])]
 }

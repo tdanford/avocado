@@ -30,7 +30,7 @@ class PileupCallSimpleSNP extends PileupCall {
   try {
     val ploidy = config [Int]("ploidy")
   } catch {
-    case NoSuchElementException nse: val ploidy = 2
+    case nse: NoSuchElementException => val ploidy = 2
   }
 
   /**
@@ -47,7 +47,7 @@ class PileupCallSimpleSNP extends PileupCall {
     require (pileup.head.deletes.length == 0 &&
 	     pileup.head.insertions.length = 0, 
 	     {println ("Can only call SNP on pileups without INDEL evidence. Pileup at %d.",
-		       pileup.head.referencePosition)}
+		       pileup.head.referencePosition)})
 	      
     /* find genotype for pileup
      * likelihood for genotype is derived from:
@@ -90,7 +90,7 @@ class PileupCallSimpleSNP extends PileupCall {
    * @param[in] pileupGroups An RDD containing lists of pileups.
    * @return An RDD containing called variants.
    */
-  override def call (pileupGroups: RDD [(void, List[Pileup])]): RDD [ADAMVariant] = {
+  override def call (pileupGroups: RDD [(Unit, List[Pileup])]): RDD [ADAMVariant] = {
     return pileupGroups.flatMap (callSNP)
   }
 }

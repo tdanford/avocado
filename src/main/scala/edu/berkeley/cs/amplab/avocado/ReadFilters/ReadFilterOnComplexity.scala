@@ -50,7 +50,7 @@ class ReadFilterOnComplexity extends ReadFilter {
    * @param[in] reads A list of reads.
    * @return Tuple of region complexity and list of reads.
    */
-  def scoreComplexity (segment: (int, List[ADAMRecord]): (MapComplexity, List[ADAMRecord]) = {
+  def scoreComplexity (segment: (Int, List[ADAMRecord])): (MapComplexity, List[ADAMRecord]) = {
     val (segmentNumber, reads) = segment
     val segmentStart = segment * stripe
     val segmentEnd = (segment + 1) * stripe
@@ -73,7 +73,7 @@ class ReadFilterOnComplexity extends ReadFilter {
    * @param[in] reads An RDD containing reads.
    * @return An RDD containing lists of reads.
    */
-  def filter (reads: RDD [(void, ADAMRecord)]): RDD [(MapComplexity, List[ADAMRecord])] = {
+  def filter (reads: RDD [(Unit, ADAMRecord)]): RDD [(MapComplexity, List[ADAMRecord])] = {
 
     /* split into windows of reads
      * FIXME: add overlap on windows

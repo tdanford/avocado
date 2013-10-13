@@ -33,6 +33,6 @@ abstract class PileupCall (val callName: String,
    * @param[in] pileupGroups An RDD containing lists of pileups.
    * @return An RDD containing called variants.
    */
-  def call (pileupGroups: RDD [(void, List[Pileup])]): RDD [ADAMVariant] 
+  def call (pileupGroups: RDD [(Unit, List[Pileup])]): RDD [ADAMVariant] 
 }
 
