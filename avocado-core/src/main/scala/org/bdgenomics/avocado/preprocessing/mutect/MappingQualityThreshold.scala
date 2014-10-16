@@ -26,5 +26,5 @@ object MappingQualityThreshold extends PreprocessingStage {
   override val stageName: String = "mapping_quality_filter"
 
   override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] =
-    rdd.filter( rec => rec.getMapq >= 0 )
+    rdd.filter(rec => rec.getMapq >= 0)
 }

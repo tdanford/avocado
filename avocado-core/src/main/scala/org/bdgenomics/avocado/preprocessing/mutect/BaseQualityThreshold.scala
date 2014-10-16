@@ -29,6 +29,6 @@ object BaseQualityThreshold extends PreprocessingStage {
   override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] =
     rdd.filter {
       case record =>
-        record.qualityScores.forall( _ >= 5 )
+        record.qualityScores.forall(_ >= 5)
     }
 }

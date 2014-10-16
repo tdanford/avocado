@@ -29,6 +29,6 @@ object MateRescueFilter extends PreprocessingStage {
   override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] =
     rdd.filter {
       case record =>
-        !record.tags.exists( a => a.tag == "XT" && a.value == "M" )
+        !record.tags.exists(a => a.tag == "XT" && a.value == "M")
     }
 }

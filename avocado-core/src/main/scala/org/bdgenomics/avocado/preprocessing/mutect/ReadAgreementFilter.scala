@@ -32,12 +32,12 @@ import org.bdgenomics.adam.rich.ReferenceMappingContext._
 object ReadAgreementFilter extends PreprocessingStage {
   override val stageName: String = "read_agreement_filter"
 
-  private def disagrees( window : Int,
-                         rec1 : AlignmentRecord, offset1 : Int,
-                         rec2 : AlignmentRecord, offset2 : Int ) : Boolean = {
+  private def disagrees(window: Int,
+                        rec1: AlignmentRecord, offset1: Int,
+                        rec2: AlignmentRecord, offset2: Int): Boolean = {
     (0 until window).exists {
       i =>
-        rec1.getSequence.charAt(offset1 + i) != rec2.getSequence.charAt(offset2+i)
+        rec1.getSequence.charAt(offset1 + i) != rec2.getSequence.charAt(offset2 + i)
     }
   }
 
@@ -55,14 +55,14 @@ object ReadAgreementFilter extends PreprocessingStage {
     rdd.keyBy(v => ReferenceMappingContext.AlignmentRecordReferenceMapping.getReferenceRegion(v))
       .sortByKey().mapPartitions {
 
-      case itr : Iterator[(ReferenceRegion, AlignmentRecord)] =>
-        itr.sliding(2).flatMap {
-          case pair : Seq[(ReferenceRegion, AlignmentRecord)] =>
-            val (p1, p2) = (pair(0), pair(1))
-            val (ref1, rec1) = p1
-            val (ref2, rec2) = p2
+        case itr: Iterator[(ReferenceRegion, AlignmentRecord)] =>
+          itr.sliding(2).flatMap {
+            case pair: Seq[(ReferenceRegion, AlignmentRecord)] =>
+              val (p1, p2) = (pair(0), pair(1))
+              val (ref1, rec1) = p1
+              val (ref2, rec2) = p2
 
-            /*
+              /*
             There are four conditions here:
             1. The reads overlap, and
               2. They disagree somewhere along their length -> return neither
@@ -70,29 +70,28 @@ object ReadAgreementFilter extends PreprocessingStage {
             4. they don't overlap -> return them both
              */
 
-            // Condition 1
-            if(ref1.overlaps(ref2)) {
-              val intersect = ref1.intersection(ref2)
-              val offset1 : Int = intersect.start.toInt - ref1.start.toInt
-              val offset2 : Int = intersect.start.toInt - ref2.start.toInt
+              // Condition 1
+              if (ref1.overlaps(ref2)) {
+                val intersect = ref1.intersection(ref2)
+                val offset1: Int = intersect.start.toInt - ref1.start.toInt
+                val offset2: Int = intersect.start.toInt - ref2.start.toInt
 
-              // Condition 2
-              if(disagrees(intersect.length().toInt, rec1, offset1, rec2, offset2)) {
-                Seq()
-              } else {
-                // Condition 3
-                if(rec1.getMapq >= rec2.getMapq) {
-                  Seq(rec1)
+                // Condition 2
+                if (disagrees(intersect.length().toInt, rec1, offset1, rec2, offset2)) {
+                  Seq()
                 } else {
-                  Seq(rec2)
+                  // Condition 3
+                  if (rec1.getMapq >= rec2.getMapq) {
+                    Seq(rec1)
+                  } else {
+                    Seq(rec2)
+                  }
                 }
+
+              } else { // Condition 4
+                Seq(rec1, rec2)
               }
-
-            } else { // Condition 4
-              Seq(rec1, rec2)
-            }
-        }
-    }
-
+          }
+      }
 
 }

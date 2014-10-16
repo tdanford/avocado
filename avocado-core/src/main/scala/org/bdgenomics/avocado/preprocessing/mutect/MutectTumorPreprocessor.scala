@@ -30,14 +30,12 @@ object MutectTumorPreprocessor extends PreprocessingStage {
     ReadAgreementFilter,
     BaseQualitySumThreshold,
     SoftClippingFilter,
-    MateRescueFilter
-  )
+    MateRescueFilter)
 
   override val stageName: String = "mutect_tumor_filter"
 
   override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] = {
-    stages.reduceLeft( (rdd : RDD[AlignmentRecord], stage : PreprocessingStage ) =>
-      stage.apply(rdd, config.configurationAt(stage.stageName))
-    )
+    stages.reduceLeft((rdd: RDD[AlignmentRecord], stage: PreprocessingStage) =>
+      stage.apply(rdd, config.configurationAt(stage.stageName)))
   }
 }

@@ -31,9 +31,9 @@ object SoftClippingFilter extends PreprocessingStage {
   override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] =
     rdd.filter {
       case record => {
-        val readLength : Int = record.getSequence.length()
-        val softClipLength : Int = record.samtoolsCigar.getCigarElements
-          .filter( _.getOperator == CigarOperator.SOFT_CLIP )
+        val readLength: Int = record.getSequence.length()
+        val softClipLength: Int = record.samtoolsCigar.getCigarElements
+          .filter(_.getOperator == CigarOperator.SOFT_CLIP)
           .map(_.getLength).sum
 
         softClipLength < 0.3 * readLength
