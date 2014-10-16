@@ -172,8 +172,8 @@ class BiallelicGenotyper(ploidy: Int = 2,
           .setReadDepth(observations.size)
           .setAlleles(calls.toList)
           .setGenotypeLikelihoods(likelihoods.map(PhredUtils.successProbabilityToPhred).toList)
-          .setReferenceReadDepth(observations.filter(_.allele == ref).size)
-          .setAlternateReadDepth(observations.filter(_.allele == alt).size)
+          .setReferenceReadDepth(observations.count(_.allele == ref))
+          .setAlternateReadDepth(observations.count(_.allele == alt))
           .build())
       }
     } else {
