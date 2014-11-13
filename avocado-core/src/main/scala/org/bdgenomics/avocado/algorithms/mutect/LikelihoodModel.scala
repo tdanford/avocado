@@ -23,28 +23,28 @@ import scala.math._
 
 trait LikelihoodModel {
   def logLikelihood(ref: String,
-                    alt : String,
+                    alt: String,
                     obs: Iterable[AlleleObservation],
-                    f : Option[Double]): Double
+                    f: Option[Double]): Double
 }
 
-case class LogOdds( m1 : LikelihoodModel, m2 : LikelihoodModel ) {
+case class LogOdds(m1: LikelihoodModel, m2: LikelihoodModel) {
 
-  def logOdds( ref : String, alt : String,
-               obs : Iterable[AlleleObservation],
-               f : Option[Double]) : Double =
+  def logOdds(ref: String, alt: String,
+              obs: Iterable[AlleleObservation],
+              f: Option[Double]): Double =
     m1.logLikelihood(ref, alt, obs, f) - m2.logLikelihood(ref, alt, obs, f)
 }
 
-object MutectLogOdds extends LogOdds( MfmModel, M0Model ) {
+object MutectLogOdds extends LogOdds(MfmModel, M0Model) {
 }
 
 object M0Model extends LikelihoodModel {
 
-  override def logLikelihood( ref : String,
-                              alt : String,
-                              obs : Iterable[AlleleObservation],
-                              f : Option[Double]) : Double =
+  override def logLikelihood(ref: String,
+                             alt: String,
+                             obs: Iterable[AlleleObservation],
+                             f: Option[Double]): Double =
     MfmModel.logLikelihood(ref, alt, obs, Some(0.0))
 }
 
@@ -53,9 +53,9 @@ object M0Model extends LikelihoodModel {
  */
 object MfmModel extends LikelihoodModel {
 
-  def e( q : Int ) : Double = pow(10.0, -0.1 * q.toDouble)
+  def e(q: Int): Double = pow(10.0, -0.1 * q.toDouble)
 
-  def P_bi( obs : AlleleObservation, r : String, m : String, f : Double ) : Double = {
+  def P_bi(obs: AlleleObservation, r: String, m: String, f: Double): Double = {
     val ei = e(obs.phred)
     if (obs.allele == r) {
       pow(f, ei / 3.0) + (1.0 - f) * (1.0 - ei)
@@ -66,10 +66,10 @@ object MfmModel extends LikelihoodModel {
     }
   }
 
-  override def logLikelihood(ref: String, alt : String,
+  override def logLikelihood(ref: String, alt: String,
                              obs: Iterable[AlleleObservation],
-                             f : Option[Double]): Double = {
-    val fEstimate : Double = f.getOrElse(obs.count(_.allele != ref).toDouble / obs.size)
+                             f: Option[Double]): Double = {
+    val fEstimate: Double = f.getOrElse(obs.count(_.allele != ref).toDouble / obs.size)
     obs.map { ob => log(P_bi(ob, ref, alt, fEstimate)) }.sum
   }
 }
@@ -81,24 +81,24 @@ object MfmModel extends LikelihoodModel {
 object BinomialModel extends LikelihoodModel {
   private val log2Pi = log(2.0 * Pi)
 
-  private def logBinomialCoefficient( n : Int, m : Int ) : Double = {
+  private def logBinomialCoefficient(n: Int, m: Int): Double = {
     val logN = log(n)
     val logM = log(m)
     val logNminusM = log(n - m)
     (n + 0.5) * logN - (m + 0.5) * logM - (n - m + 0.5) * logNminusM - 0.5 * log2Pi
   }
 
-  private def logBinomialLikelihood( p : Double, n : Int, k : Int ) : Double = {
+  private def logBinomialLikelihood(p: Double, n: Int, k: Int): Double = {
     logBinomialCoefficient(n, k) + k * log(p) + (n - k) * log(1.0 - p)
   }
 
-  override def logLikelihood(ref: String, alt : String,
+  override def logLikelihood(ref: String, alt: String,
                              obs: Iterable[AlleleObservation],
-                             f : Option[Double]): Double = {
+                             f: Option[Double]): Double = {
     val (refObs, altObs) = obs.partition(_.allele == ref)
     val refCount = refObs.size
     val altCount = altObs.size
-    val p : Double = f.getOrElse( altCount.toDouble / (refCount + altCount) )
+    val p: Double = f.getOrElse(altCount.toDouble / (refCount + altCount))
     logBinomialLikelihood(p, refCount + altCount, altCount)
   }
 }

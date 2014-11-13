@@ -24,16 +24,17 @@ import org.apache.spark.rdd.RDD
 
 object MutectNormalProcessor extends PreprocessingStage {
 
-  private val stages = List(
+  private val stages = List[PreprocessingStage](
     BaseQualityThreshold,
-    ReadAgreementFilter,
-  )
+    ReadAgreementFilter)
 
   override val stageName: String = "mutect_normal_filter"
 
-  override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] = {
-    stages.reduceLeft( (rdd : RDD[AlignmentRecord], stage : PreprocessingStage ) =>
-      stage.apply(rdd, config.configurationAt(stage.stageName))
-    )
+  override def apply(rdd: RDD[AlignmentRecord],
+                     config: SubnodeConfiguration): RDD[AlignmentRecord] = {
+
+    stages.foldLeft(rdd)(
+      (rdd: RDD[AlignmentRecord], stage: PreprocessingStage) =>
+        stage.apply(rdd, config.configurationAt(stage.stageName)))
   }
 }

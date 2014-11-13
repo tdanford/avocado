@@ -24,7 +24,7 @@ import org.apache.spark.rdd.RDD
 
 object MutectTumorPreprocessor extends PreprocessingStage {
 
-  private val stages = List(
+  private val stages = List[PreprocessingStage](
     MappingQualityThreshold,
     BaseQualityThreshold,
     ReadAgreementFilter,
@@ -34,8 +34,11 @@ object MutectTumorPreprocessor extends PreprocessingStage {
 
   override val stageName: String = "mutect_tumor_filter"
 
-  override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] = {
-    stages.reduceLeft((rdd: RDD[AlignmentRecord], stage: PreprocessingStage) =>
-      stage.apply(rdd, config.configurationAt(stage.stageName)))
+  override def apply(rdd: RDD[AlignmentRecord],
+                     config: SubnodeConfiguration): RDD[AlignmentRecord] = {
+
+    stages.foldLeft(rdd)(
+      (rdd: RDD[AlignmentRecord], stage: PreprocessingStage) =>
+        stage.apply(rdd, config.configurationAt(stage.stageName)))
   }
 }
