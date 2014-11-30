@@ -35,4 +35,23 @@ trait MutectPostprocessor extends Serializable {
              normalReads: RDD[Classified[AlignmentRecord]]): RDD[VariantContext]
 }
 
+class MutectSTDFilter extends MutectPostprocessor {
+  override def filter(variants: RDD[VariantContext], tumorReads: RDD[Classified[AlignmentRecord]], normalReads: RDD[Classified[AlignmentRecord]]): RDD[VariantContext] =
+    variants
+}
+
+class MutectHCFilter extends MutectPostprocessor {
+
+  val filterOrdering = Seq(
+    new PoorMappingFilter(),
+    new ProximalGapFilter(),
+    new TriallelicSiteFilter()
+  )
+
+  override def filter(variants: RDD[VariantContext],
+                      tumorReads: RDD[Classified[AlignmentRecord]],
+                      normalReads: RDD[Classified[AlignmentRecord]]): RDD[VariantContext] =
+    filterOrdering.foldLeft(variants)((vars, proc) => proc.filter(vars, tumorReads, normalReads))
+}
+
 
