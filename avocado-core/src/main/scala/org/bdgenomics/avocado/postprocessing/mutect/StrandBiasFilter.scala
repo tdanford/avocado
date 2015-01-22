@@ -23,6 +23,8 @@ import org.bdgenomics.adam.models.VariantContext
 import org.bdgenomics.formats.avro.AlignmentRecord
 
 /**
+ * Text from the Mutect paper:
+ *
  *   Reject false positives caused by context-specific sequencing errors where the vast
  *   majority of the alternate alleles are observed in a single direction of reads. We
  *   perform this test by stratifying the reads by direction and then applying the core
@@ -35,6 +37,7 @@ class StrandBiasFilter extends MutectPostprocessor {
   override def filter(variants: RDD[VariantContext],
                       tumorReads: RDD[Classified[AlignmentRecord]],
                       normalReads: RDD[Classified[AlignmentRecord]]): RDD[VariantContext] = {
+
 
   }
 }
