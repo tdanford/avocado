@@ -22,14 +22,8 @@ import org.apache.commons.configuration.plist.PropertyListConfiguration
 import org.apache.hadoop.mapreduce.Job
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{ SparkContext, Logging }
+import org.bdgenomics.utils.cli._
 import org.kohsuke.args4j.{ Option => option, Argument }
-import org.bdgenomics.adam.cli.{
-  ADAMSparkCommand,
-  ADAMCommandCompanion,
-  ParquetArgs,
-  Args4j,
-  Args4jBase
-}
 import org.bdgenomics.adam.models.{ VariantContext, ReferenceRegion }
 import org.bdgenomics.adam.rdd.ADAMContext._
 import org.bdgenomics.avocado.Timers._
@@ -48,7 +42,7 @@ import org.bdgenomics.formats.avro.{
 }
 import org.bdgenomics.utils.instrumentation._
 
-object Avocado extends ADAMCommandCompanion {
+object Avocado extends BDGCommandCompanion {
 
   val commandName = "Avocado"
   val commandDescription = "Call variants using avocado and the ADAM preprocessing pipeline."
@@ -78,7 +72,7 @@ class AvocadoArgs extends Args4jBase with ParquetArgs {
   var fragmentLength: Long = 10000L
 }
 
-class Avocado(protected val args: AvocadoArgs) extends ADAMSparkCommand[AvocadoArgs] with Logging {
+class Avocado(protected val args: AvocadoArgs) extends BDGSparkCommand[AvocadoArgs] with Logging {
 
   // companion object to this class - needed for ADAMCommand framework
   val companion = Avocado
@@ -184,9 +178,8 @@ class Avocado(protected val args: AvocadoArgs) extends ADAMSparkCommand[AvocadoA
    * by the ADAMSparkCommand shell.
    *
    * @param sc SparkContext for RDDs.
-   * @param job Hadoop Job container for file I/O.
    */
-  def run(sc: SparkContext, job: Job) {
+  def run(sc: SparkContext) {
 
     log.info("Starting avocado...")
 
@@ -226,4 +219,5 @@ class Avocado(protected val args: AvocadoArgs) extends ADAMSparkCommand[AvocadoA
         args.disableDictionaryEncoding)
     }
   }
+
 }

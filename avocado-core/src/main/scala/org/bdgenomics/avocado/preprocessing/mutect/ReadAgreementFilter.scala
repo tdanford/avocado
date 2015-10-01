@@ -22,12 +22,10 @@ import org.apache.commons.configuration.SubnodeConfiguration
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import org.bdgenomics.adam.models.ReferenceRegion
-import org.bdgenomics.adam.rich.ReferenceMappingContext
 import org.bdgenomics.avocado.preprocessing.PreprocessingStage
 import org.bdgenomics.formats.avro.AlignmentRecord
 import org.bdgenomics.adam.rich.RichAlignmentRecord._
 import scala.collection.JavaConversions._
-import org.bdgenomics.adam.rich.ReferenceMappingContext._
 
 object ReadAgreementFilter extends PreprocessingStage {
   override val stageName: String = "read_agreement_filter"
@@ -50,19 +48,20 @@ object ReadAgreementFilter extends PreprocessingStage {
    * @param config
    * @return
    */
-  override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] =
+  override def apply(rdd: RDD[AlignmentRecord], config: SubnodeConfiguration): RDD[AlignmentRecord] = {
 
-    rdd.keyBy(v => ReferenceMappingContext.AlignmentRecordReferenceMapping.getReferenceRegion(v))
-      .sortByKey().mapPartitions {
+    def regioner(v: AlignmentRecord): ReferenceRegion = ReferenceRegion(v.getContig.getContigName, v.getStart, v.getEnd)
 
-        case itr: Iterator[(ReferenceRegion, AlignmentRecord)] =>
-          itr.sliding(2).flatMap {
-            case pair: Seq[(ReferenceRegion, AlignmentRecord)] =>
-              val (p1, p2) = (pair(0), pair(1))
-              val (ref1, rec1) = p1
-              val (ref2, rec2) = p2
+    rdd.keyBy(regioner).sortByKey().mapPartitions {
 
-              /*
+      case itr: Iterator[(ReferenceRegion, AlignmentRecord)] =>
+        itr.sliding(2).flatMap {
+          case pair: Seq[(ReferenceRegion, AlignmentRecord)] =>
+            val (p1, p2) = (pair(0), pair(1))
+            val (ref1, rec1) = p1
+            val (ref2, rec2) = p2
+
+            /*
             There are four conditions here:
             1. The reads overlap, and
               2. They disagree somewhere along their length -> return neither
@@ -70,28 +69,30 @@ object ReadAgreementFilter extends PreprocessingStage {
             4. they don't overlap -> return them both
              */
 
-              // Condition 1
-              if (ref1.overlaps(ref2)) {
-                val intersect = ref1.intersection(ref2)
-                val offset1: Int = intersect.start.toInt - ref1.start.toInt
-                val offset2: Int = intersect.start.toInt - ref2.start.toInt
+            // Condition 1
+            if (ref1.overlaps(ref2)) {
+              val intersect = ref1.intersection(ref2)
+              val offset1: Int = intersect.start.toInt - ref1.start.toInt
+              val offset2: Int = intersect.start.toInt - ref2.start.toInt
 
-                // Condition 2
-                if (disagrees(intersect.length().toInt, rec1, offset1, rec2, offset2)) {
-                  Seq()
+              // Condition 2
+              if (disagrees(intersect.length().toInt, rec1, offset1, rec2, offset2)) {
+                Seq()
+              } else {
+                // Condition 3
+                if (rec1.getMapq >= rec2.getMapq) {
+                  Seq(rec1)
                 } else {
-                  // Condition 3
-                  if (rec1.getMapq >= rec2.getMapq) {
-                    Seq(rec1)
-                  } else {
-                    Seq(rec2)
-                  }
+                  Seq(rec2)
                 }
-
-              } else { // Condition 4
-                Seq(rec1, rec2)
               }
-          }
-      }
+
+            } else {
+              // Condition 4
+              Seq(rec1, rec2)
+            }
+        }
+    }
+  }
 
 }
